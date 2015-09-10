@@ -16,9 +16,10 @@ func Streaker(w http.ResponseWriter, req *http.Request) {
 func main() {
 	//Handle request
 	http.HandleFunc("/", Streaker)
-	err := http.ListenAndServe(":80", nil)
+	err := http.ListenAndServe(":8000", nil)
 	if err != nil {
 		log.Error("Can't start streaker!")
+		log.Error(err)
 		os.Exit(1)
 	}
 }
