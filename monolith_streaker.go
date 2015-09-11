@@ -9,7 +9,7 @@ import (
 )
 
 func Streaker(w http.ResponseWriter, req *http.Request) {
-	index, _ := ioutil.ReadFile("./index.html")
+	index, _ := ioutil.ReadFile("./monolith.html")
 	io.WriteString(w, string(index))
 }
 
