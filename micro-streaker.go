@@ -9,29 +9,40 @@ import (
 	"os"
 )
 
-type SvcData struct {
-	URL  string
-	Resp map[string]string
+type HttpResp struct {
+	url      string
+	response *http.Response
+	err      error
 }
 
-type Services struct {
-	Micropig   SvcData
-	Microscope SvcData
-	Microbrew  SvcData
+var SvcUrls = []string{
+	"http://streaker.technoblogic.io/micropig",
+	"http://streaker.technoblogic.io/microscope",
+	"http://streaker.technoblogic.io/microbrew",
 }
 
-type SvcUrls struct {
-	Micropig   "http://streaker.technoblogic.io/micropig"
-	Microscope "http://streaker.technoblogic.io/microscope"
-	Microbrew  "http://streaker.technoblogic.io/microbrew"
-}
-
-func getData() (s Services, err error) {
-	// Create channel for resp
-
-	// Go routine to query URL
-
-	return &s
+func asyncQuery(urls []string) []*HttpResp {
+	// A channel for responses
+	respCh := make(chan *HttpResp)
+	// The struct to handle the response
+	responses := []*HttpResp{}
+	// A loop with a nested go func to feed the channel with the results of the query
+	for _, url := range urls {
+		go func(url string) {
+			log.Info("Fetching: ", url)
+			resp, err := http.Get(url)
+			ch <- &HttpResp{url, resp, err}
+		}(url)
+	}
+	// For each result in the channel, return a resp
+	select {
+	case r := <-ch:
+		log.Info("Fetched: ", r.url)
+		responses = append(responses, r)
+		if len(responses) == len(urls) {
+			return responses
+		}
+	}
 }
 
 func Streaker(w http.ResponseWriter, req *http.Request) {
