@@ -15,10 +15,19 @@ type HttpResp struct {
 	err      error
 }
 
-var SvcUrls = []string{
-	"http://streaker.technoblogic.io/micropig",
-	"http://streaker.technoblogic.io/microscope",
-	"http://streaker.technoblogic.io/microbrew",
+var urls = map[string]map[string]string{
+	"micropig"  { 
+		"url" = "http://streaker.technoblogic.io/micropig",
+		"resp" = "",
+	},
+	"microscope" = {
+		"url" = "http://streaker.technoblogic.io/microscope",
+		"resp" = "",
+	},
+	"microbrew" = {
+		"url" = "http://streaker.technoblogic.io/microbrew",
+		"resp" = "",
+	}
 }
 
 func asyncQuery(urls []string) []*HttpResp {
@@ -31,18 +40,23 @@ func asyncQuery(urls []string) []*HttpResp {
 		go func(url string) {
 			log.Info("Fetching: ", url)
 			resp, err := http.Get(url)
-			ch <- &HttpResp{url, resp, err}
+			respCh <- &HttpResp{url, resp, err}
 		}(url)
 	}
-	// For each result in the channel, return a resp
-	select {
-	case r := <-ch:
-		log.Info("Fetched: ", r.url)
-		responses = append(responses, r)
-		if len(responses) == len(urls) {
-			return responses
+	// Fill an array with the responses 
+	for {
+		select {
+		case r := <-respCh:
+			log.Info("Fetched: ", r.url)
+			responses = append(responses, r)
+			if len(responses) == len(urls) {
+				return responses
+			}
+		case <-time.After(time.Milisecond * 50):
+			log.Info(".")
 		}
 	}
+
 }
 
 func Streaker(w http.ResponseWriter, req *http.Request) {
