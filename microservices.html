@@ -1,9 +1,15 @@
 <html>
   <title>Microservices</title>
   <h1>Streaker App </h1>
+  <hr></hr>
   {{with .Services}}
   {{range $service, $data := .}}
   <h3>{{$service}}</h3>
+  Response: {{index $data "resp"}}
+  <p>
+  Status: {{index $data "status"}}
+  </p>
+  <hr></hr>
   {{end}}
   {{end}}
 </html>
