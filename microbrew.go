@@ -1,25 +1,24 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
 	"log"
 	"net/http"
 	"os"
-	"regexp"
-	"strings"
 )
 
 func response(rw http.ResponseWriter, request *http.Request) {
-
+	beerGif := "http://cdn.psfk.com/wp-content/uploads/2013/07/beer-labels-dogfish-head.gif"
+	json, err := json.Marshal(beerGif)
 	if err != nil {
-		log.Println("ERROR: ", err)
+		log.Println(err)
+		os.Exit(1)
 	}
-	json, err := json.Marshal(services)
-	rw.Write([]byte("http://cdn.psfk.com/wp-content/uploads/2013/07/beer-labels-dogfish-head.gif"))
+	rw.Write([]byte(json))
 }
 
 func main() {
+	log.Println("Microbrew tapped on localhost:12312/microbrew")
 	http.HandleFunc("/microbrew", response)
 	http.ListenAndServe(":12312", nil)
 }
