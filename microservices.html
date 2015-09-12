@@ -1,0 +1,9 @@
+<html>
+  <title>Microservices</title>
+  <h1>Streaker App </h1>
+  {{with .Services}}
+  {{range $service, $data := .}}
+  <h3>{{$service}}</h3>
+  {{end}}
+  {{end}}
+</html>

@@ -1,9 +1,9 @@
 package main
 
 import (
-	log "github.com/Sirupsen/logrus"
-	//	"html/template"
 	"fmt"
+	log "github.com/Sirupsen/logrus"
+	"html/template"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -15,6 +15,10 @@ type HttpResp struct {
 	url      string
 	response *http.Response
 	err      error
+}
+
+type Page struct {
+	Services map[string]map[string]string
 }
 
 var services = map[string]map[string]string{
@@ -79,8 +83,13 @@ func Streaker(w http.ResponseWriter, req *http.Request) {
 	for service, data := range svcData {
 		log.Info(service, ": ", data["resp"], " ", data["status"])
 	}
-	//t, _ := template.ParseFiles("index.html")
-	//t.Execute(w, p)
+
+	var p = &Page{
+		Services: svcData,
+	}
+
+	t, _ := template.ParseFiles("microservices.html")
+	t.Execute(w, &p)
 }
 
 func main() {
