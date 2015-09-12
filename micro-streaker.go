@@ -19,24 +19,27 @@ type HttpResp struct {
 
 var services = map[string]map[string]string{
 	"micropig": {
-		"url":  "http://localhost:12312/micropig", //"http://streaker.technoblogic.io/micropig",
-		"resp": "",
+		"url":    "http://localhost:12312/micropig", //"http://streaker.technoblogic.io/micropig",
+		"resp":   "",
+		"status": "",
 	},
 	"microscope": {
-		"url":  "http://localhost:12312/microscope", //"http://streaker.technoblogic.io/microscope",
-		"resp": "",
+		"url":    "http://localhost:12312/microscope", //"http://streaker.technoblogic.io/microscope",
+		"resp":   "",
+		"status": "",
 	},
 	"microbrew": {
-		"url":  "http://localhost:12312/microbrew", //"http://streaker.technoblogic.io/microbrew",
-		"resp": "",
+		"url":    "http://localhost:12312/microbrew", //"http://streaker.technoblogic.io/microbrew",
+		"resp":   "",
+		"status": "",
 	},
 }
 
 func asyncQuery(services map[string]map[string]string) map[string]map[string]string {
 	// A channel for responses
 	respCh := make(chan *HttpResp)
-	// The struct to handle the response
-	//responses := []*HttpResp{}
+	// Array of responses
+	responses := []string{}
 	// A loop with a nested go func to feed the channel with the results of the query
 	for service, _ := range services {
 		url := services[service]["url"]
@@ -48,7 +51,6 @@ func asyncQuery(services map[string]map[string]string) map[string]map[string]str
 	}
 	// Fill an array with the responses
 	for {
-		responseCount := 0
 		select {
 		case r := <-respCh:
 			respString, err := ioutil.ReadAll(r.response.Body)
@@ -58,11 +60,13 @@ func asyncQuery(services map[string]map[string]string) map[string]map[string]str
 				os.Exit(1)
 			}
 			services[r.name]["resp"] = string(respString)
-			responseCount += 1
-			if responseCount == len(services) {
+			services[r.name]["status"] = r.response.Status
+			// In order to properly break loop, count the number of responses by adding to array
+			responses = append(responses, r.name)
+			if len(responses) == len(services) {
 				return services
 			}
-		case <-time.After(time.Millisecond * 50):
+		case <-time.After(time.Millisecond * 500):
 			fmt.Printf(".")
 		}
 	}
@@ -71,8 +75,9 @@ func asyncQuery(services map[string]map[string]string) map[string]map[string]str
 
 func Streaker(w http.ResponseWriter, req *http.Request) {
 	svcData := asyncQuery(services)
+	log.Info("Received data:")
 	for service, data := range svcData {
-		log.Info(service, ": ", data["resp"])
+		log.Info(service, ": ", data["resp"], " ", data["status"])
 	}
 	//t, _ := template.ParseFiles("index.html")
 	//t.Execute(w, p)
