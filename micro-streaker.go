@@ -47,7 +47,7 @@ func asyncQuery(services map[string]map[string]string) []*HttpResp {
 			log.Info("Fetching: ", url)
 			resp, err := http.Get(url)
 			if resp == nil {
-				body := "Nil Body"
+				body := "Down"
 				var dump = &HttpResp{
 					Name:   name,
 					Url:    url,
@@ -92,9 +92,6 @@ func asyncQuery(services map[string]map[string]string) []*HttpResp {
 
 func Streaker(w http.ResponseWriter, req *http.Request) {
 	svcData := asyncQuery(services)
-	for _, d := range svcData {
-		log.Info("Resp: ", d.Resp)
-	}
 	// Add the data to the page struct for use in template
 	var p = &Page{
 		Services: svcData,
