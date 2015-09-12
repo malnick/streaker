@@ -2,11 +2,11 @@ package main
 
 import (
 	log "github.com/Sirupsen/logrus"
-	"html/template"
-	"io"
+	//	"html/template"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"time"
 )
 
 type HttpResp struct {
@@ -18,7 +18,7 @@ type HttpResp struct {
 
 var services = map[string]map[string]string{
 	"micropig": {
-		"url":  "http://localhost:12312/microbrew", //"http://streaker.technoblogic.io/micropig",
+		"url":  "http://localhost:12312/micropig", //"http://streaker.technoblogic.io/micropig",
 		"resp": "",
 	},
 	"microscope": {
@@ -37,8 +37,8 @@ func asyncQuery(services map[string]map[string]string) map[string]map[string]str
 	// The struct to handle the response
 	responses := []*HttpResp{}
 	// A loop with a nested go func to feed the channel with the results of the query
-	for service, data := range services {
-		url := service["url"]
+	for service, _ := range services {
+		url := services[service]["url"]
 		go func(url string) {
 			log.Info("Fetching: ", url)
 			resp, err := http.Get(url)
@@ -46,26 +46,28 @@ func asyncQuery(services map[string]map[string]string) map[string]map[string]str
 		}(url)
 	}
 	// Fill an array with the responses
-	for {
-		select {
-		case r := <-respCh:
-			log.Info("Fetched: ", r.url, " for ", r.name, " service.")
-			services[r.name]["resp"] = r.resp
-			if len(responses) == len(services) {
-				return services
-			}
-		case <-time.After(time.Milisecond * 50):
-			log.Info(".")
+	select {
+	case r := <-respCh:
+		respString, err := ioutil.ReadAll(r.response.Body)
+		log.Info("Fetched: ", r.url, " for ", r.name, " service: ", string(respString))
+		if err != nil {
+			log.Error(err)
+			os.Exit(1)
 		}
+		services[r.name]["resp"] = string(respString)
+		if len(responses) == len(services) {
+			return services
+		}
+	case <-time.After(time.Millisecond * 50):
+		log.Info(".")
 	}
-
 }
 
 func Streaker(w http.ResponseWriter, req *http.Request) {
-	svcData := asyncQuery
+	svcData := asyncQuery(services)
 	log.Info(svcData)
-	t, _ := template.ParseFiles("index.html")
-	t.Execute(w, p)
+	//t, _ := template.ParseFiles("index.html")
+	//t.Execute(w, p)
 }
 
 func main() {
