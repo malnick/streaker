@@ -46,20 +46,32 @@ func asyncQuery(services map[string]map[string]string) []*HttpResp {
 		go func(url string) {
 			log.Info("Fetching: ", url)
 			resp, err := http.Get(url)
-			if err != nil {
-				log.Warn(err)
+			if resp == nil {
+				log.Warn("Nil body")
+				body := "Nil Body"
+				var dump = &HttpResp{
+					Name:   name,
+					Url:    url,
+					Body:   body,
+					Status: body,
+					Err:    err,
+				}
+				log.Warn("Dumping ", dump.Name, " as ", dump.Body)
+				respCh <- dump
+
+			} else {
+				body, _ := ioutil.ReadAll(resp.Body)
+				status := resp.Status
+				var dump = &HttpResp{
+					Name:   name,
+					Url:    url,
+					Body:   string(body),
+					Status: status,
+					Err:    err,
+				}
+				log.Warn("Dumping ", dump.Name, " as ", dump.Body)
+				respCh <- dump
 			}
-			body, err := ioutil.ReadAll(resp.Body)
-			status := resp.Status
-			var dump = &HttpResp{
-				Name:   name,
-				Url:    url,
-				Body:   string(body),
-				Status: status,
-				Err:    err,
-			}
-			log.Warn("Dumping ", dump.Name, " as ", dump.Body)
-			respCh <- dump
 		}(url)
 	}
 	// Fill an array with the responses
