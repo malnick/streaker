@@ -23,6 +23,7 @@ func response(rw http.ResponseWriter, request *http.Request) {
 		}
 		rw.Write([]byte(json))
 		time.Sleep(time.Second * 1)
+		break
 	}
 }
 

@@ -47,7 +47,6 @@ func asyncQuery(services map[string]map[string]string) []*HttpResp {
 			log.Info("Fetching: ", url)
 			resp, err := http.Get(url)
 			if resp == nil {
-				log.Warn("Nil body")
 				body := "Nil Body"
 				var dump = &HttpResp{
 					Name:   name,
