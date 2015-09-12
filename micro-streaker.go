@@ -3,6 +3,7 @@ package main
 import (
 	log "github.com/Sirupsen/logrus"
 	//	"html/template"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -35,7 +36,7 @@ func asyncQuery(services map[string]map[string]string) map[string]map[string]str
 	// A channel for responses
 	respCh := make(chan *HttpResp)
 	// The struct to handle the response
-	responses := []*HttpResp{}
+	//responses := []*HttpResp{}
 	// A loop with a nested go func to feed the channel with the results of the query
 	for service, _ := range services {
 		url := services[service]["url"]
@@ -46,26 +47,33 @@ func asyncQuery(services map[string]map[string]string) map[string]map[string]str
 		}(url)
 	}
 	// Fill an array with the responses
-	select {
-	case r := <-respCh:
-		respString, err := ioutil.ReadAll(r.response.Body)
-		log.Info("Fetched: ", r.url, " for ", r.name, " service: ", string(respString))
-		if err != nil {
-			log.Error(err)
-			os.Exit(1)
+	for {
+		responseCount := 0
+		select {
+		case r := <-respCh:
+			respString, err := ioutil.ReadAll(r.response.Body)
+			log.Info("Fetched: ", r.url, " for ", r.name, " service: ", string(respString), " - ", r.response.Status)
+			if err != nil {
+				log.Error(err)
+				os.Exit(1)
+			}
+			services[r.name]["resp"] = string(respString)
+			responseCount += 1
+			if responseCount == len(services) {
+				return services
+			}
+		case <-time.After(time.Millisecond * 50):
+			fmt.Printf(".")
 		}
-		services[r.name]["resp"] = string(respString)
-		if len(responses) == len(services) {
-			return services
-		}
-	case <-time.After(time.Millisecond * 50):
-		log.Info(".")
 	}
+	return services
 }
 
 func Streaker(w http.ResponseWriter, req *http.Request) {
 	svcData := asyncQuery(services)
-	log.Info(svcData)
+	for service, data := range svcData {
+		log.Info(service, ": ", data["resp"])
+	}
 	//t, _ := template.ParseFiles("index.html")
 	//t.Execute(w, p)
 }
