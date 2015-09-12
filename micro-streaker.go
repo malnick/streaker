@@ -18,20 +18,20 @@ type HttpResp struct {
 
 var services = map[string]map[string]string{
 	"micropig": {
-		"url":  "http://streaker.technoblogic.io/micropig",
+		"url":  "http://localhost:12312/microbrew", //"http://streaker.technoblogic.io/micropig",
 		"resp": "",
 	},
 	"microscope": {
-		"url":  "http://streaker.technoblogic.io/microscope",
+		"url":  "http://localhost:12312/microscope", //"http://streaker.technoblogic.io/microscope",
 		"resp": "",
 	},
 	"microbrew": {
-		"url":  "http://streaker.technoblogic.io/microbrew",
+		"url":  "http://localhost:12312/microbrew", //"http://streaker.technoblogic.io/microbrew",
 		"resp": "",
 	},
 }
 
-func asyncQuery(services map[string]map[string]string) (services map[string]map[string]string) {
+func asyncQuery(services map[string]map[string]string) map[string]map[string]string {
 	// A channel for responses
 	respCh := make(chan *HttpResp)
 	// The struct to handle the response
@@ -49,10 +49,10 @@ func asyncQuery(services map[string]map[string]string) (services map[string]map[
 	for {
 		select {
 		case r := <-respCh:
-			log.Info("Fetched: ", r.url)
-			responses = append(responses, r)
+			log.Info("Fetched: ", r.url, " for ", r.name, " service.")
+			services[r.name]["resp"] = r.resp
 			if len(responses) == len(services) {
-				return responses
+				return services
 			}
 		case <-time.After(time.Milisecond * 50):
 			log.Info(".")
@@ -62,7 +62,8 @@ func asyncQuery(services map[string]map[string]string) (services map[string]map[
 }
 
 func Streaker(w http.ResponseWriter, req *http.Request) {
-	p, err := getData
+	svcData := asyncQuery
+	log.Info(svcData)
 	t, _ := template.ParseFiles("index.html")
 	t.Execute(w, p)
 }
