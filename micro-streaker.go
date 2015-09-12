@@ -24,10 +24,10 @@ type Page struct {
 
 var services = map[string]map[string]string{
 	"micropig": {
-		"url": "http://localhost:12312/micropig", //"http://streaker.technoblogic.io/micropig",
+		"url": "http://localhost:12313/micropig", //"http://streaker.technoblogic.io/micropig",
 	},
 	"microscope": {
-		"url": "http://localhost:12312/microscope", //"http://streaker.technoblogic.io/microscope",
+		"url": "http://localhost:12314/microscope", //"http://streaker.technoblogic.io/microscope",
 	},
 	"microbrew": {
 		"url": "http://localhost:12312/microbrew", //"http://streaker.technoblogic.io/microbrew",
