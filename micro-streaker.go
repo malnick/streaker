@@ -11,12 +11,12 @@ import (
 )
 
 type HttpResp struct {
-	name     string
-	url      string
-	response *http.Response
-	body     string
-	status   string
-	err      error
+	name string
+	url  string
+	//response *http.Response
+	body   string
+	status string
+	err    error
 }
 
 type Page struct {
@@ -41,18 +41,23 @@ var services = map[string]map[string]string{
 	},
 }
 
-func asyncQuery(services map[string]map[string]string) map[string]map[string]string {
+func asyncQuery(services map[string]map[string]string) []*HttpResp {
 	// A channel for responses
 	respCh := make(chan *HttpResp)
 	// Array of responses
-	responses := []string{}
+	responses := []*HttpResp{}
 	// A loop with a nested go func to feed the channel with the results of the query
 	for service, _ := range services {
 		url := services[service]["url"]
 		go func(url string) {
 			log.Info("Fetching: ", url)
 			resp, err := http.Get(url)
-			respCh <- &HttpResp{service, url, resp, "", "", err}
+			body, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				panic(err)
+			}
+			status := resp.Status
+			respCh <- &HttpResp{service, url, string(body), status, err}
 		}(url)
 	}
 	// Fill an array with the responses
@@ -60,27 +65,24 @@ func asyncQuery(services map[string]map[string]string) map[string]map[string]str
 		select {
 		case r := <-respCh:
 			log.Warn(r)
-			log.Info("Fetched: ", r.name, " service: ", r.response, " - ", r.response.Status)
-			services[r.name]["resp"] = r.response
-			services[r.name]["status"] = r.response.Status
+			log.Info("Fetched: ", r.name, " service: ", r.body, " - ", r.status)
+			//services[r.name]["resp"] = r.response
+			//services[r.name]["status"] = r.response.Status
 			// In order to properly break loop, count the number of responses by adding to array
-			responses = append(responses, r.name)
+			responses = append(responses, r)
 			if len(responses) == 3 {
-				return services
+				return responses
 			}
 		case <-time.After(time.Millisecond * 50):
 			fmt.Printf(".")
 		}
 	}
-	return make(map[string]map[string]string)
+	return []*HttpResp{}
 }
 
 func Streaker(w http.ResponseWriter, req *http.Request) {
 	svcData := asyncQuery(services)
 	log.Info("Received data:")
-	for service, data := range svcData {
-		log.Info(service, ": ", data["resp"], " ", data["status"])
-	}
 
 	var p = &Page{
 		Services: svcData,
