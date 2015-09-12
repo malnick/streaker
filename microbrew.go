@@ -10,7 +10,9 @@ import (
 
 func response(rw http.ResponseWriter, request *http.Request) {
 	beerGifs := []string{
-		`<div style="max-width: 500px;" id="_giphy_cHw5gruhGb0IM"></div><script>var _giphy = _giphy || []; _giphy.push({id: "cHw5gruhGb0IM",w: 500, h: 375});var g = document.createElement("script"); g.type = "text/javascript"; g.async = true;g.src = ("https:" == document.location.protocol ? "https://" : "http://") + "giphy.com/static/js/widgets/embed.js";var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(g, s);</script>`,
+		`http://hypefreshmag.com/wp-content/uploads/2015/06/beer-genes-app-will-help-people-pick-beers.jpg`,
+		`https://lygsbtd.files.wordpress.com/2011/08/beer_toast.jpg`,
+		`http://rule13.com/beerrun/hophead/wp-content/uploads/2014/01/taps.jpg`,
 	}
 
 	for _, value := range beerGifs {

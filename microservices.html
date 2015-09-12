@@ -3,11 +3,11 @@
   <h1>Streaker App </h1>
   <hr></hr>
   {{with .Services}}
-  {{range $service, $data := .}}
-  <h3>{{$service}}</h3>
-  Response: {{index $data "resp"}}
+  {{range $index, $data := .}}
+  <h3>{{$data.name}}</h3>
+  <img src="{{$data.body}}">
   <p>
-  Status: {{index $data "status"}}
+  Status: {{$data.status}}
   </p>
   <hr></hr>
   {{end}}

@@ -11,9 +11,8 @@ import (
 )
 
 type HttpResp struct {
-	name string
-	url  string
-	//response *http.Response
+	name   string
+	url    string
 	body   string
 	status string
 	err    error
@@ -26,18 +25,12 @@ type Page struct {
 var services = map[string]map[string]string{
 	"micropig": {
 		"url": "http://localhost:12312/micropig", //"http://streaker.technoblogic.io/micropig",
-		//		"resp":   "",
-		//		"status": "",
 	},
 	"microscope": {
 		"url": "http://localhost:12312/microscope", //"http://streaker.technoblogic.io/microscope",
-		//		"resp":   "",
-		//		"status": "",
 	},
 	"microbrew": {
 		"url": "http://localhost:12312/microbrew", //"http://streaker.technoblogic.io/microbrew",
-		//		"resp":   "",
-		//		"status": "",
 	},
 }
 
@@ -52,10 +45,10 @@ func asyncQuery(services map[string]map[string]string) []*HttpResp {
 		go func(url string) {
 			log.Info("Fetching: ", url)
 			resp, err := http.Get(url)
-			body, err := ioutil.ReadAll(resp.Body)
 			if err != nil {
-				panic(err)
+				log.Warn(err)
 			}
+			body, err := ioutil.ReadAll(resp.Body)
 			status := resp.Status
 			respCh <- &HttpResp{service, url, string(body), status, err}
 		}(url)
@@ -64,10 +57,7 @@ func asyncQuery(services map[string]map[string]string) []*HttpResp {
 	for {
 		select {
 		case r := <-respCh:
-			log.Warn(r)
 			log.Info("Fetched: ", r.name, " service: ", r.body, " - ", r.status)
-			//services[r.name]["resp"] = r.response
-			//services[r.name]["status"] = r.response.Status
 			// In order to properly break loop, count the number of responses by adding to array
 			responses = append(responses, r)
 			if len(responses) == 3 {
@@ -82,12 +72,11 @@ func asyncQuery(services map[string]map[string]string) []*HttpResp {
 
 func Streaker(w http.ResponseWriter, req *http.Request) {
 	svcData := asyncQuery(services)
-	log.Info("Received data:")
-
+	// Add the data to the page struct for use in template
 	var p = &Page{
 		Services: svcData,
 	}
-
+	// Execute the template
 	t, _ := template.ParseFiles("microservices.html")
 	t.Execute(w, &p)
 }
