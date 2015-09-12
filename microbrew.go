@@ -19,7 +19,7 @@ func response(rw http.ResponseWriter, request *http.Request) {
 			log.Println(err)
 			os.Exit(1)
 		}
-		rw.Write([]byte(value))
+		rw.Write([]byte(json))
 		time.Sleep(time.Second * 1)
 	}
 }

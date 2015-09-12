@@ -14,28 +14,30 @@ type HttpResp struct {
 	name     string
 	url      string
 	response *http.Response
+	body     string
+	status   string
 	err      error
 }
 
 type Page struct {
-	Services map[string]map[string]string
+	Services []*HttpResp //map[string]map[string]string
 }
 
 var services = map[string]map[string]string{
 	"micropig": {
-		"url":    "http://localhost:12312/micropig", //"http://streaker.technoblogic.io/micropig",
-		"resp":   "",
-		"status": "",
+		"url": "http://localhost:12312/micropig", //"http://streaker.technoblogic.io/micropig",
+		//		"resp":   "",
+		//		"status": "",
 	},
 	"microscope": {
-		"url":    "http://localhost:12312/microscope", //"http://streaker.technoblogic.io/microscope",
-		"resp":   "",
-		"status": "",
+		"url": "http://localhost:12312/microscope", //"http://streaker.technoblogic.io/microscope",
+		//		"resp":   "",
+		//		"status": "",
 	},
 	"microbrew": {
-		"url":    "http://localhost:12312/microbrew", //"http://streaker.technoblogic.io/microbrew",
-		"resp":   "",
-		"status": "",
+		"url": "http://localhost:12312/microbrew", //"http://streaker.technoblogic.io/microbrew",
+		//		"resp":   "",
+		//		"status": "",
 	},
 }
 
@@ -50,31 +52,27 @@ func asyncQuery(services map[string]map[string]string) map[string]map[string]str
 		go func(url string) {
 			log.Info("Fetching: ", url)
 			resp, err := http.Get(url)
-			respCh <- &HttpResp{service, url, resp, err}
+			respCh <- &HttpResp{service, url, resp, "", "", err}
 		}(url)
 	}
 	// Fill an array with the responses
 	for {
 		select {
 		case r := <-respCh:
-			respString, err := ioutil.ReadAll(r.response.Body)
-			log.Info("Fetched: ", r.url, " for ", r.name, " service: ", string(respString), " - ", r.response.Status)
-			if err != nil {
-				log.Error(err)
-				os.Exit(1)
-			}
-			services[r.name]["resp"] = string(respString)
+			log.Warn(r)
+			log.Info("Fetched: ", r.name, " service: ", r.response, " - ", r.response.Status)
+			services[r.name]["resp"] = r.response
 			services[r.name]["status"] = r.response.Status
 			// In order to properly break loop, count the number of responses by adding to array
 			responses = append(responses, r.name)
-			if len(responses) == len(services) {
+			if len(responses) == 3 {
 				return services
 			}
-		case <-time.After(time.Millisecond * 500):
+		case <-time.After(time.Millisecond * 50):
 			fmt.Printf(".")
 		}
 	}
-	return services
+	return make(map[string]map[string]string)
 }
 
 func Streaker(w http.ResponseWriter, req *http.Request) {
