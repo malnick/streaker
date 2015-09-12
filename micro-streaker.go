@@ -11,11 +11,11 @@ import (
 )
 
 type HttpResp struct {
-	name   string
-	url    string
-	body   string
-	status string
-	err    error
+	Name   string
+	Url    string
+	Body   string
+	Status string
+	Err    error
 }
 
 type Page struct {
@@ -42,6 +42,7 @@ func asyncQuery(services map[string]map[string]string) []*HttpResp {
 	// A loop with a nested go func to feed the channel with the results of the query
 	for service, _ := range services {
 		url := services[service]["url"]
+		name := service
 		go func(url string) {
 			log.Info("Fetching: ", url)
 			resp, err := http.Get(url)
@@ -50,17 +51,25 @@ func asyncQuery(services map[string]map[string]string) []*HttpResp {
 			}
 			body, err := ioutil.ReadAll(resp.Body)
 			status := resp.Status
-			respCh <- &HttpResp{service, url, string(body), status, err}
+			var dump = &HttpResp{
+				Name:   name,
+				Url:    url,
+				Body:   string(body),
+				Status: status,
+				Err:    err,
+			}
+			log.Warn("Dumping ", dump.Name, " as ", dump.Body)
+			respCh <- dump
 		}(url)
 	}
 	// Fill an array with the responses
 	for {
 		select {
 		case r := <-respCh:
-			log.Info("Fetched: ", r.name, " service: ", r.body, " - ", r.status)
+			log.Info("Fetched: ", r.Name, " service: ", r.Body, " - ", r.Status)
 			// In order to properly break loop, count the number of responses by adding to array
 			responses = append(responses, r)
-			if len(responses) == 3 {
+			if len(responses) == len(services) {
 				return responses
 			}
 		case <-time.After(time.Millisecond * 50):
@@ -72,6 +81,10 @@ func asyncQuery(services map[string]map[string]string) []*HttpResp {
 
 func Streaker(w http.ResponseWriter, req *http.Request) {
 	svcData := asyncQuery(services)
+	for _, d := range svcData {
+		log.Info("Service: ", d.Name)
+		log.Info("Status: ", d.Status)
+	}
 	// Add the data to the page struct for use in template
 	var p = &Page{
 		Services: svcData,
