@@ -5,10 +5,12 @@
   {{with .Services}}
   {{range $i, $data := .}}
   <h3>{{.Name}}</h3>
-  <img src="{{.Body}}">
+  <body>
+    <img src={{.Resp}} height="25%">
   <p>
   Status: <b>{{.Status}}</b>
   </p>
+  </body>
   <hr></hr>
   {{end}}
   {{end}}

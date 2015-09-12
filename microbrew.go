@@ -3,9 +3,9 @@ package main
 import (
 	"encoding/json"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
-	"time"
 )
 
 func response(rw http.ResponseWriter, request *http.Request) {
@@ -15,16 +15,13 @@ func response(rw http.ResponseWriter, request *http.Request) {
 		`http://rule13.com/beerrun/hophead/wp-content/uploads/2014/01/taps.jpg`,
 	}
 
-	for _, value := range beerGifs {
-		json, err := json.Marshal(value)
-		if err != nil {
-			log.Println(err)
-			os.Exit(1)
-		}
-		rw.Write([]byte(json))
-		time.Sleep(time.Second * 1)
-		break
+	returnUrl := beerGifs[rand.Intn(len(beerGifs))]
+	json, err := json.Marshal(returnUrl)
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
 	}
+	rw.Write([]byte(json))
 }
 
 func main() {

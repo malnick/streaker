@@ -3,17 +3,17 @@ package main
 import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
-	"html/template"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"text/template"
 	"time"
 )
 
 type HttpResp struct {
 	Name   string
 	Url    string
-	Body   string
+	Resp   string
 	Status string
 	Err    error
 }
@@ -51,11 +51,11 @@ func asyncQuery(services map[string]map[string]string) []*HttpResp {
 				var dump = &HttpResp{
 					Name:   name,
 					Url:    url,
-					Body:   body,
+					Resp:   body,
 					Status: body,
 					Err:    err,
 				}
-				log.Warn("Dumping ", dump.Name, " as ", dump.Body)
+				log.Warn("Dumping ", dump.Name, " as ", dump.Resp)
 				respCh <- dump
 
 			} else {
@@ -64,11 +64,11 @@ func asyncQuery(services map[string]map[string]string) []*HttpResp {
 				var dump = &HttpResp{
 					Name:   name,
 					Url:    url,
-					Body:   string(body),
+					Resp:   string(body),
 					Status: status,
 					Err:    err,
 				}
-				log.Warn("Dumping ", dump.Name, " as ", dump.Body)
+				log.Warn("Dumping ", dump.Name, " as ", dump.Resp)
 				respCh <- dump
 			}
 		}(url)
@@ -77,7 +77,7 @@ func asyncQuery(services map[string]map[string]string) []*HttpResp {
 	for {
 		select {
 		case r := <-respCh:
-			log.Info("Fetched: ", r.Name, " service: ", r.Body, " - ", r.Status)
+			log.Info("Fetched: ", r.Name, " service: ", r.Resp, " - ", r.Status)
 			// In order to properly break loop, count the number of responses by adding to array
 			responses = append(responses, r)
 			if len(responses) == len(services) {
@@ -93,8 +93,7 @@ func asyncQuery(services map[string]map[string]string) []*HttpResp {
 func Streaker(w http.ResponseWriter, req *http.Request) {
 	svcData := asyncQuery(services)
 	for _, d := range svcData {
-		log.Info("Service: ", d.Name)
-		log.Info("Status: ", d.Status)
+		log.Info("Resp: ", d.Resp)
 	}
 	// Add the data to the page struct for use in template
 	var p = &Page{
