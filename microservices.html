@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
   <head>
-    <title>Micro Services</title>
+    <title>Streaker</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css  ">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.m  in.css">
@@ -10,7 +10,7 @@
   <body>
     <div class="container">
       <div class="page-header">
-        <h1>Streaker<small>A Micro-Services Platform</small></h1>
+        <h1>Streaker App<small> A Micro-Services Platform</small></h1>
       </div>
     <div class="panel panel-default">
       <div class="panel-heading">
@@ -21,16 +21,18 @@
       {{range $i, $data := .}}
       <table class="table table-bordered">
         <tr>
-          <th><h3>{{.Name}}</h3></th>
-        </tr>
-        <tr>
-          <td><img src={{.Resp}} height="25%"></td>
-          <td>Status: <b>{{.Status}}</b></td>
-          <td>URL: <b>{{.Url}}</b></td>
+          <h3 class="text-capitalize">{{.Name}}:<small> A Streaker Micro Service</small></h3>
+          <img src={{.Resp}} class="img-thumbnail" class="img-responsive">
+          
+          <h4>Status: <b><mark>{{.Status}}</mark></b> URL: <b>{{.Url}}</b></h4>
+
         </tr>
       </table>
       {{end}}
       {{end}}
     </div>
   </body>
+  <blockquote>
+  <footer>Shamelessly created with <a href="http://getbootstrap.com/css">Bootstrap</a></footer>
+  </blockquote>
 </html>
