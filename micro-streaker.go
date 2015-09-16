@@ -31,7 +31,7 @@ var services = map[string]map[string]string{
 		"url": "http://streaker.technoblogic.io/microscope",
 	},
 	"microbrew": {
-		"url": "http://streaker.technoblogic.io/microbrew",
+		"url": "http://localhost:8001", //"http://streaker.technoblogic.io/microbrew",
 	},
 }
 
