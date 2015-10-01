@@ -23,23 +23,20 @@
       <div class="panel-heading">
         <h3 class="panel-title">Streaker Platform</h3>
       </div>
-      <div class="panel-body">
+    </div>
+
+    <div class="row">
       {{with .Services}}
       {{range $i, $data := .}}
-      <table class="table table-bordered">
-        <tr>
-          <h3 class="text-capitalize">{{.Name}}<small> A Streaker Micro Service</small></h3>
-          <img src={{.Resp}} class="img-thumbnail" class="img-responsive">
-          
+        <div class="col-md-4">
+          <h2>{{.Name}} Micro Service</h2>
+          <img src="{{.Resp}}" class="img-responsive img-thumbnail">
           <h4>Status: <b><mark>{{.Status}}</mark></b> URL: <b>{{.Url}}</b></h4>
-
-        </tr>
-      </table>
-      {{end}}
-      {{end}}
+        </div>
+        {{end}}
+        {{end}}
     </div>
+
+  </div>
   </body>
-  <blockquote>
-  <footer>Shamelessly created with <a href="http://getbootstrap.com/css">Bootstrap</a></footer>
-  </blockquote>
 </html>
