@@ -30,7 +30,7 @@
       {{range $i, $data := .}}
         <div class="col-md-4">
           <h2>{{.Name}} Micro Service</h2>
-          <img src="{{.Resp}}" class="img-responsive img-thumbnail">
+          <img src={{.Resp}} class="img-responsive img-thumbnail">
           <h4>Status: <b><mark>{{.Status}}</mark></b> URL: <b>{{.Url}}</b></h4>
         </div>
         {{end}}
